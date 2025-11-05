@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "0874b1a0-7e8c-44cb-a0f1-6dc29636322a",
+  "packageName": "com.tror.trorbot",
+  "developer": {
+    "name": "Abhinay Parasa",
+    "websiteUrl": "https://tror.ai",
+    "privacyUrl": "https://tror.ai/privacy",
+    "termsOfUseUrl": "https://tror.ai/terms"
+  },
+  "name": {
+    "short": "Tror Bot",
+    "full": "Tror Conversational AI Agent"
+  },
+  "description": {
+    "short": "Chat directly with your AI Agent in Microsoft Teams",
+    "full": "This bot allows users to interact with your AI agent built on your custom platform. It provides conversational capabilities, responds to queries, and integrates with your backend services. Use !agent for custom agent queries and !gpt for ChatGPT integration."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#60A18E",
+  "bots": [
+    {
+      "botId": "0874b1a0-7e8c-44cb-a0f1-6dc29636322a",
+      "scopes": ["personal"],
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": [
+    "tror.ai",
+    "token.botframework.com"
+  ],
+  "webApplicationInfo": {
+    "id": "0874b1a0-7e8c-44cb-a0f1-6dc29636322a",
+    "resource": "https://RscBasedStoreApp"
+  }
+}
