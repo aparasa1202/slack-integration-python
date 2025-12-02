@@ -84,7 +84,7 @@ The Teams app is now properly configured and ready for deployment. You just need
 ## 📋 **Files Updated:**
 - ✅ `teams-app/manifest.json` - Fixed structure and formatting
 - ✅ `teams-app/color.png` - Created 192x192 color icon
-- ✅ `teams-app/outline.png` - Created 32x32 outline icon  
+- ✅ `teams-app/outline.png` - Created 32x32 outline icon
 - ✅ `teams-app/manifest.zip` - Updated package ready for upload
 
 Your Teams bot integration is now **production-ready**! 🎉

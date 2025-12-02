@@ -30,4 +30,3 @@ def can_use_feature(user_id: str, feature: Literal["agent", "openai"]) -> bool:
         return True
     # default role: honor default_allow flag
     return config.access.default_allow
-
