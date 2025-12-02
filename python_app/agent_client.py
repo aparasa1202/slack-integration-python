@@ -8,6 +8,10 @@ from .config import config
 from .logger import log_error, log_info
 
 
+class AgentUnavailableError(Exception):
+    """Raised when the agent service cannot be reached or returns an error."""
+
+
 def call_agent(query: str) -> str:
     try:
         response = requests.post(
@@ -27,7 +31,7 @@ def call_agent(query: str) -> str:
         return "Agent did not return any message."
     except requests.HTTPError as http_error:
         log_error("Agent API returned a non-success status", http_error)
-        return "Agent returned an error while processing the request."
+        raise AgentUnavailableError("Agent responded with an error") from http_error
     except requests.RequestException as error:
         log_error("Agent API error", error)
-        return "Error connecting to agent."
+        raise AgentUnavailableError("Agent is unavailable") from error

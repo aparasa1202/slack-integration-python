@@ -5,6 +5,7 @@ A Slack Bolt bot that responds to `@agent` or `@gpt` prompts by forwarding the m
 ## Features
 - Mention-driven routing: `@agent` forwards to your agent, `@gpt` to OpenAI, anything else uses the configured default.
 - Works in DMs, channels, and threads (bot replies in thread when available).
+- Automatically gathers recent thread history and passes it as context to the responder so replies stay in-sync with the conversation.
 - Optional socket mode support for environments where inbound HTTP isn’t possible.
 - Structured logging and ready-to-use health check (HTTP mode).
 
@@ -52,6 +53,19 @@ python_app/
 └── utils/
     └── jwt_validator.py
 ```
+
+## Access Control
+- Configure role-based access via env vars (Slack user IDs):
+  - `SLACK_ADMIN_USERS` – comma-separated list of user IDs with full access.
+- `SLACK_ALLOWED_USERS` – IDs explicitly allowed.
+- `SLACK_BLOCKED_USERS` – IDs explicitly denied.
+- `SLACK_DEFAULT_ALLOW` – `true`/`false` to permit others by default (default: true).
+- `IDLE_SLEEP_MINUTES` – minutes of inactivity before the bot announces it was sleeping (default: 10).
+
+## OpenAI (Responses API with optional browsing)
+- Set `OPENAI_API_URL` (`https://api.openai.com/v1/responses` for Responses API).
+- Set `OPENAI_MODEL` to a supported model (e.g., `gpt-4.1` or `gpt-4.1-mini`).
+- Toggle web browsing with `OPENAI_BROWSER_ENABLED=true` to allow live information when using the Responses API.
 
 ## Troubleshooting
 - **Bot not responding**: confirm the Slack app is installed in the workspace and has `app_mentions:read` and channel history scopes; check logs for errors.

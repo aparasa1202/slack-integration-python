@@ -1,0 +1,16 @@
+# Ignore environment files
+.env
+.env.local
+.env.*
+!.env.example
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs
+*.log
+
+# OS-specific junk
+.DS_Store
+Thumbs.db

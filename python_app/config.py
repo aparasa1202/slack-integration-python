@@ -30,6 +30,12 @@ def _parse_float(value: Optional[str], default: float) -> float:
         return default
 
 
+def _strip_comment(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    return value.split("#", 1)[0].strip()
+
+
 @dataclass(frozen=True)
 class ServerConfig:
     port: int
@@ -40,6 +46,7 @@ class ServerConfig:
 @dataclass(frozen=True)
 class BotConfig:
     default_responder: Literal["agent", "openai"]
+    idle_sleep_minutes: int
 
 
 @dataclass(frozen=True)
@@ -63,6 +70,7 @@ class OpenAIConfig:
     model: str
     max_tokens: int
     temperature: float
+    browser_enabled: bool
 
 
 @dataclass(frozen=True)
@@ -78,6 +86,14 @@ class SecurityConfig:
 
 
 @dataclass(frozen=True)
+class AccessControlConfig:
+    admins: set[str]
+    allowlist: set[str]
+    blocklist: set[str]
+    default_allow: bool
+
+
+@dataclass(frozen=True)
 class Config:
     server: ServerConfig
     bot: BotConfig
@@ -86,6 +102,7 @@ class Config:
     openai: OpenAIConfig
     logging: LoggingConfig
     security: SecurityConfig
+    access: AccessControlConfig
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -100,7 +117,10 @@ class Config:
                 host=os.getenv("HOST", "0.0.0.0"),
                 events_path=os.getenv("SLACK_EVENTS_PATH", "/slack/events"),
             ),
-            bot=BotConfig(default_responder=default_responder),  # type: ignore[arg-type]
+            bot=BotConfig(
+                default_responder=default_responder,  # type: ignore[arg-type]
+                idle_sleep_minutes=_parse_int(os.getenv("IDLE_SLEEP_MINUTES"), 10),
+            ),
             slack=SlackConfig(
                 bot_token=os.getenv("SLACK_BOT_TOKEN", ""),
                 signing_secret=os.getenv("SLACK_SIGNING_SECRET", ""),
@@ -113,12 +133,14 @@ class Config:
             ),
             openai=OpenAIConfig(
                 api_key=os.getenv("OPENAI_API_KEY"),
-                api_url=os.getenv(
-                    "OPENAI_API_URL", "https://api.openai.com/v1/chat/completions"
-                ),
-                model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
+                api_url=_strip_comment(
+                    os.getenv("OPENAI_API_URL", "https://api.openai.com/v1/responses")
+                )
+                or "https://api.openai.com/v1/responses",
+                model=_strip_comment(os.getenv("OPENAI_MODEL", "gpt-4.1")) or "gpt-4.1",
                 max_tokens=_parse_int(os.getenv("OPENAI_MAX_TOKENS"), 1_000),
                 temperature=_parse_float(os.getenv("OPENAI_TEMPERATURE"), 0.7),
+                browser_enabled=_parse_bool(os.getenv("OPENAI_BROWSER_ENABLED"), False),
             ),
             logging=LoggingConfig(
                 level=os.getenv("LOG_LEVEL", "info"),
@@ -128,6 +150,7 @@ class Config:
                 jwt_secret=os.getenv("JWT_SECRET"),
                 jwt_expiration=os.getenv("JWT_EXPIRATION", "24h"),
             ),
+            access=_load_access_control(),
         )
 
     def validate(self) -> None:
@@ -153,6 +176,25 @@ class Config:
             )
 
 
+def _parse_set(value: Optional[str]) -> set[str]:
+    if not value:
+        return set()
+    return {item.strip() for item in value.split(",") if item.strip()}
+
+
+def _load_access_control() -> AccessControlConfig:
+    admins = _parse_set(os.getenv("SLACK_ADMIN_USERS"))
+    allowlist = _parse_set(os.getenv("SLACK_ALLOWED_USERS"))
+    blocklist = _parse_set(os.getenv("SLACK_BLOCKED_USERS"))
+    default_allow = _parse_bool(os.getenv("SLACK_DEFAULT_ALLOW"), True)
+
+    return AccessControlConfig(
+        admins=admins,
+        allowlist=allowlist,
+        blocklist=blocklist,
+        default_allow=default_allow,
+    )
+
+
 # Instantiate a config object once so the rest of the application can import it.
 config = Config.from_env()
-
